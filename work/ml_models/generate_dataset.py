@@ -15,20 +15,18 @@ def generate_sample():
 
     recent_modification = 1 if days_since_last_edit < 30 else 0
 
-    # lifecycle state logic
     if is_unused == 0 and recent_modification == 1:
-        state = 0   # ACTIVE_FREQUENT_CHANGE
+        state = 0   
 
     elif is_unused == 0 and recent_modification == 0:
-        state = 1   # ACTIVE_STABLE
+        state = 1   
 
     elif is_unused == 1 and recent_modification == 1:
-        state = 2   # DEVELOPMENT_PHASE
+        state = 2 
 
     else:
-        state = 3   # DEAD_CODE
+        state = 3   
 
-    # add sensitivity dimension
     if contains_sensitive == 1:
         label = state + 4
     else:

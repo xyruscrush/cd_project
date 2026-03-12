@@ -3,7 +3,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 import joblib
 
-# load dataset
 df = pd.read_csv("dead_code_dataset.csv")
 
 X = df.drop("label", axis=1)
