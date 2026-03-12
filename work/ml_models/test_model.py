@@ -1,7 +1,22 @@
 import joblib
-import numpy as np
+import pandas as pd
+import random
+import matplotlib.pyplot as plt
 
 model = joblib.load("dead_code_model.pkl")
+
+columns = [
+    "loc",
+    "is_unused",
+    "contains_sensitive",
+    "num_params",
+    "cyclomatic_complexity",
+    "commit_count",
+    "code_churn",
+    "days_since_last_edit",
+    "author_count",
+    "recent_modification"
+]
 
 labels = {
     0: "ACTIVE_FREQUENT_CHANGE",
@@ -15,16 +30,65 @@ labels = {
 }
 
 
-sample1 = np.array([[80,0,0,2,4,20,300,10,3,1]])
+def generate_valid_sample():
 
-sample2 = np.array([[25,1,0,1,2,2,20,400,1,0]])
+    loc = random.randint(5, 300)
+    is_unused = random.choice([0,1])
+    contains_sensitive = random.choice([0,1])
+    num_params = random.randint(0,6)
+    cyclomatic_complexity = random.randint(1,20)
+    commit_count = random.randint(0,60)
+    code_churn = random.randint(0,1500)
+    days_since_last_edit = random.randint(0,1200)
+    author_count = random.randint(1,12)
 
-sample3 = np.array([[50,1,1,3,6,1,10,800,1,0]])
+    recent_modification = 1 if days_since_last_edit < 30 else 0
 
-samples = [sample1, sample2, sample3]
+    return [
+        loc,
+        is_unused,
+        contains_sensitive,
+        num_params,
+        cyclomatic_complexity,
+        commit_count,
+        code_churn,
+        days_since_last_edit,
+        author_count,
+        recent_modification
+    ]
 
-for i, sample in enumerate(samples, start=1):
 
-    prediction = model.predict(sample)[0]
 
-    print(f"Sample {i} Prediction:", labels[prediction])
+num_samples = 50
+
+data = [generate_valid_sample() for _ in range(num_samples)]
+
+df = pd.DataFrame(data, columns=columns)
+
+
+predictions = model.predict(df)
+
+df["prediction"] = predictions
+df["prediction_label"] = df["prediction"].map(labels)
+
+print("\nSample Predictions:\n")
+print(df.head(10))
+
+
+label_counts = df["prediction_label"].value_counts()
+
+plt.figure()
+
+label_counts.plot(kind="bar")
+
+plt.title("Dead Code Prediction Distribution")
+
+plt.xlabel("Prediction Type")
+
+plt.ylabel("Count")
+
+plt.xticks(rotation=45)
+
+plt.tight_layout()
+
+plt.show()
