@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AI Code Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🚀 AI GitHub Code Analyzer</h1>
+
+        <!-- INPUT -->
+        <div class="input-box">
+            <input type="text" id="repoUrl" placeholder="Paste GitHub Repo URL">
+            <button onclick="analyze()">Analyze</button>
+        </div>
+
+        <div id="loading" class="hidden">Analyzing...</div>
+
+        <!-- SUMMARY -->
+        <div id="summary" class="summary hidden">
+            <div class="stat">Files: <span id="totalFiles"></span></div>
+            <div class="stat">High Risk: <span id="highRisk"></span></div>
+            <div class="stat">Sensitive: <span id="sensitive"></span></div>
+        </div>
+
+        <!-- RESULTS -->
+        <div id="results" class="results"></div>
+
+        <!-- CHARTS -->
+        <h2>📊 Analysis Charts</h2>
+
+        <canvas id="usageChart"></canvas>
+        <canvas id="activityChart"></canvas>
+        <canvas id="importanceChart"></canvas>
+        <canvas id="sensitivityChart"></canvas>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

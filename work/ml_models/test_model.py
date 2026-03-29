@@ -2,37 +2,19 @@ import joblib
 import pandas as pd
 import random
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
-model = joblib.load("dead_code_model.pkl")
+model = joblib.load("code_analysis_model.pkl")
 
 columns = [
-    "loc",
-    "is_unused",
-    "contains_sensitive",
-    "num_params",
-    "cyclomatic_complexity",
-    "commit_count",
-    "code_churn",
-    "days_since_last_edit",
-    "author_count",
-    "recent_modification"
+    "loc","is_unused","contains_sensitive","num_params",
+    "cyclomatic_complexity","commit_count","code_churn",
+    "days_since_last_edit","author_count","recent_modification"
 ]
 
-labels = {
-    0: "ACTIVE_FREQUENT_CHANGE",
-    1: "ACTIVE_STABLE",
-    2: "DEVELOPMENT_PHASE",
-    3: "DEAD_CODE",
-    4: "ACTIVE_FREQUENT_CHANGE + SENSITIVE",
-    5: "ACTIVE_STABLE + SENSITIVE",
-    6: "DEVELOPMENT_PHASE + SENSITIVE",
-    7: "DEAD_CODE + SENSITIVE"
-}
+def generate_sample():
 
-
-def generate_valid_sample():
-
-    loc = random.randint(5, 300)
+    loc = random.randint(5,300)
     is_unused = random.choice([0,1])
     contains_sensitive = random.choice([0,1])
     num_params = random.randint(0,6)
@@ -45,50 +27,46 @@ def generate_valid_sample():
     recent_modification = 1 if days_since_last_edit < 30 else 0
 
     return [
-        loc,
-        is_unused,
-        contains_sensitive,
-        num_params,
-        cyclomatic_complexity,
-        commit_count,
-        code_churn,
-        days_since_last_edit,
-        author_count,
-        recent_modification
+        loc,is_unused,contains_sensitive,num_params,
+        cyclomatic_complexity,commit_count,code_churn,
+        days_since_last_edit,author_count,recent_modification
     ]
 
 
+samples = [generate_sample() for _ in range(300)]
 
-num_samples = 50
-
-data = [generate_valid_sample() for _ in range(num_samples)]
-
-df = pd.DataFrame(data, columns=columns)
-
+df = pd.DataFrame(samples, columns=columns)
 
 predictions = model.predict(df)
 
-df["prediction"] = predictions
-df["prediction_label"] = df["prediction"].map(labels)
+pred_df = pd.DataFrame(
+    predictions,
+    columns=[
+        "usage",
+        "activity",
+        "importance",
+        "sensitivity"
+    ]
+)
 
-print("\nSample Predictions:\n")
-print(df.head(10))
+labels = ["usage","activity","importance","sensitivity"]
 
+with PdfPages("code_analysis_report.pdf") as pdf:
 
-label_counts = df["prediction_label"].value_counts()
+    for label in labels:
 
-plt.figure()
+        plt.figure()
 
-label_counts.plot(kind="bar")
+        pred_df[label].value_counts().sort_index().plot(kind="bar")
 
-plt.title("Dead Code Prediction Distribution")
+        plt.title(label.upper()+" SCORE DISTRIBUTION")
 
-plt.xlabel("Prediction Type")
+        plt.xlabel("Degree (0-3)")
 
-plt.ylabel("Count")
+        plt.ylabel("Number of Functions")
 
-plt.xticks(rotation=45)
+        pdf.savefig()
 
-plt.tight_layout()
+        plt.close()
 
-plt.show()
+print("Report generated: code_analysis_report.pdf")
